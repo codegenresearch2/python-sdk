@@ -40,7 +40,9 @@ async def stdio_client(server: StdioServerParameters):
     write_stream, write_stream_reader = anyio.create_memory_object_stream(0)
 
     process = await anyio.open_process(
-        [server.command, *server.args], env=server.env, stderr=sys.stderr
+        [server.command, *server.args],
+        env=server.env,
+        stderr=sys.stderr
     )
 
     async def stdout_reader():
@@ -70,7 +72,7 @@ async def stdio_client(server: StdioServerParameters):
         try:
             async with write_stream_reader:
                 async for message in write_stream_reader:
-                    json = message.model_dump_json(by_alias=True, exclude_none=True)
+                    json = message.model_dump_json(by_alias=True)
                     await process.stdin.send((json + "\n").encode())
         except anyio.ClosedResourceError:
             await anyio.lowlevel.checkpoint()
