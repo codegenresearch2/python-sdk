@@ -1,1 +1,1 @@
-# This line was incorrectly formatted and caused a syntax error. It has been commented out."}python
+from mcp_python.shared.session import BaseSession\\n\nclass ClientSession(BaseSession):\\n    # Your implementation here
