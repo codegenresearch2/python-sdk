@@ -1,1 +1,1 @@
-import logging\
+import logging\"nfrom contextlib import asynccontextmanager\"nfrom typing import Any\"nfrom uuid import UUID, uuid4\"nimport anyio\"nfrom urllib.parse import quote\"n\"nlogger = logging.getLogger(__name__)\"n\"n@asynccontextmanager\"nasync def sse_server_transport(endpoint: str):"
