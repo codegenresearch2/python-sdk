@@ -79,7 +79,7 @@ async def stdio_client(server: StdioServerParameters):
     async with (
         anyio.create_task_group() as tg,
         process,
-   ):
+    ):
         tg.start_soon(stdout_reader)
         tg.start_soon(stdin_writer)
         yield read_stream, write_stream
