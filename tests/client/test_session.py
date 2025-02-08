@@ -31,7 +31,7 @@ async def test_client_session_initialize():
         jsonrpc_request = await client_to_server_receive.receive()
         assert isinstance(jsonrpc_request.root, JSONRPCRequest)
         request = ClientRequest.model_validate(
-            jsonrpc_request.model_dump(by_alias=True, exclude_none=True)
+            jsonrpc_request.model_dump(by_alias=True, exclude_none=True, mode='json')
         )
         assert isinstance(request.root, InitializeRequest)
 
@@ -45,7 +45,7 @@ async def test_client_session_initialize():
                     experimental=None,
                     prompts=None,
                 ),
-                serverInfo=Implementation(name="mock-server", version="0.1.0"),
+                serverInfo=Implementation(name='mock-server', version='0.1.0'),
             )
         )
 
@@ -53,16 +53,16 @@ async def test_client_session_initialize():
             await server_to_client_send.send(
                 JSONRPCMessage(
                     JSONRPCResponse(
-                        jsonrpc="2.0",
+                        jsonrpc='2.0',
                         id=jsonrpc_request.root.id,
-                        result=result.model_dump(by_alias=True, exclude_none=True),
+                        result=result.model_dump(by_alias=True, exclude_none=True, mode='json'),
                     )
                 )
             )
             jsonrpc_notification = await client_to_server_receive.receive()
             assert isinstance(jsonrpc_notification.root, JSONRPCNotification)
             initialized_notification = ClientNotification.model_validate(
-                jsonrpc_notification.model_dump(by_alias=True, exclude_none=True)
+                jsonrpc_notification.model_dump(by_alias=True, exclude_none=True, mode='json')
             )
 
     async def listen_session():
@@ -82,7 +82,7 @@ async def test_client_session_initialize():
     assert isinstance(result, InitializeResult)
     assert result.protocolVersion == 1
     assert isinstance(result.capabilities, ServerCapabilities)
-    assert result.serverInfo == Implementation(name="mock-server", version="0.1.0")
+    assert result.serverInfo == Implementation(name='mock-server', version='0.1.0')
 
     # Check that the client sent the initialized notification
     assert initialized_notification
