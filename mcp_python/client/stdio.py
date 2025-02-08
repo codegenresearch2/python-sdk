@@ -39,11 +39,10 @@ async def stdio_client(server: StdioServerParameters):
     read_stream_writer, read_stream = anyio.create_memory_object_stream(0)
     write_stream, write_stream_reader = anyio.create_memory_object_stream(0)
 
-    process = await anyio.open_process(
-        [server.command, *server.args],
-        env=server.env,
-        stderr=sys.stderr
-    )
+    process = await anyio.open_process([
+        server.command,
+        *server.args,
+    ], env=server.env, stderr=sys.stderr)
 
     async def stdout_reader():
         assert process.stdout, "Opened process is missing stdout"
@@ -72,7 +71,7 @@ async def stdio_client(server: StdioServerParameters):
         try:
             async with write_stream_reader:
                 async for message in write_stream_reader:
-                    json = message.model_dump_json(by_alias=True)
+                    json = message.model_dump_json(by_alias=True, exclude_none=True)
                     await process.stdin.send((json + "\n").encode())
         except anyio.ClosedResourceError:
             await anyio.lowlevel.checkpoint()
@@ -80,7 +79,7 @@ async def stdio_client(server: StdioServerParameters):
     async with (
         anyio.create_task_group() as tg,
         process,
-    ):
+   ):
         tg.start_soon(stdout_reader)
         tg.start_soon(stdin_writer)
         yield read_stream, write_stream
