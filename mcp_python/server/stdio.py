@@ -10,7 +10,8 @@ from mcp_python.types import JSONRPCMessage
 
 @asynccontextmanager
 async def stdio_server(
-    stdin: anyio.AsyncFile | None = None, stdout: anyio.AsyncFile | None = None
+    stdin: anyio.AsyncFile | None = None,
+    stdout: anyio.AsyncFile | None = None
 ):
     """
     Server transport for stdio: this communicates with an MCP client by reading from the current process' stdin and writing to stdout.
@@ -21,7 +22,7 @@ async def stdio_server(
     if not stdout:
         stdout = anyio.wrap_file(sys.stdout)
 
-    read_stream: MemoryObjectReceiveStream[JSONRPCMessage | Exception]
+    read_stream: MemoryObjectReceiveStream[JSONRPCMessage]
     read_stream_writer: MemoryObjectSendStream[JSONRPCMessage | Exception]
 
     write_stream: MemoryObjectSendStream[JSONRPCMessage]
