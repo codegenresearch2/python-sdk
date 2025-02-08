@@ -20,12 +20,8 @@ from mcp_python.types import (
 
 @pytest.mark.anyio
 async def test_client_session_initialize():
-    client_to_server_send, client_to_server_receive = anyio.create_memory_object_stream[
-        JSONRPCMessage
-    ](1)
-    server_to_client_send, server_to_client_receive = anyio.create_memory_object_stream[
-        JSONRPCMessage
-    ](1)
+    client_to_server_send, client_to_server_receive = anyio.create_memory_object_stream[JSONRPCMessage](1)
+    server_to_client_send, server_to_client_receive = anyio.create_memory_object_stream[JSONRPCMessage](1)
 
     initialized_notification = None
 
@@ -35,7 +31,7 @@ async def test_client_session_initialize():
         jsonrpc_request = await client_to_server_receive.receive()
         assert isinstance(jsonrpc_request.root, JSONRPCRequest)
         request = ClientRequest.model_validate(
-            jsonrpc_request.model_dump(by_alias=True, mode="json", exclude_none=True)
+            jsonrpc_request.model_dump(by_alias=True, exclude_none=True)
         )
         assert isinstance(request.root, InitializeRequest)
 
@@ -59,14 +55,14 @@ async def test_client_session_initialize():
                     JSONRPCResponse(
                         jsonrpc="2.0",
                         id=jsonrpc_request.root.id,
-                        result=result.model_dump(by_alias=True, mode="json", exclude_none=True),
+                        result=result.model_dump(by_alias=True, exclude_none=True),
                     )
                 )
             )
             jsonrpc_notification = await client_to_server_receive.receive()
             assert isinstance(jsonrpc_notification.root, JSONRPCNotification)
             initialized_notification = ClientNotification.model_validate(
-                jsonrpc_notification.model_dump(by_alias=True, mode="json", exclude_none=True)
+                jsonrpc_notification.model_dump(by_alias=True, exclude_none=True)
             )
 
     async def listen_session():
