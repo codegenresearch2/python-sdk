@@ -45,7 +45,7 @@ async def test_client_session_initialize():
                     experimental=None,
                     prompts=None,
                 ),
-                serverInfo=Implementation(name='mock-server', version='0.1.0'),
+                serverInfo=Implementation(name="mock-server", version="0.1.0"),
             )
         )
 
@@ -53,7 +53,7 @@ async def test_client_session_initialize():
             await server_to_client_send.send(
                 JSONRPCMessage(
                     JSONRPCResponse(
-                        jsonrpc='2.0',
+                        jsonrpc="2.0",
                         id=jsonrpc_request.root.id,
                         result=result.model_dump(by_alias=True, exclude_none=True, mode='json'),
                     )
@@ -73,7 +73,7 @@ async def test_client_session_initialize():
     async with (
         ClientSession(server_to_client_receive, client_to_server_send) as session,
         anyio.create_task_group() as tg,
-    ):
+   ):
         tg.start_soon(mock_server)
         tg.start_soon(listen_session)
         result = await session.initialize()
@@ -82,7 +82,7 @@ async def test_client_session_initialize():
     assert isinstance(result, InitializeResult)
     assert result.protocolVersion == 1
     assert isinstance(result.capabilities, ServerCapabilities)
-    assert result.serverInfo == Implementation(name='mock-server', version='0.1.0')
+    assert result.serverInfo == Implementation(name="mock-server", version="0.1.0")
 
     # Check that the client sent the initialized notification
     assert initialized_notification
