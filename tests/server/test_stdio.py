@@ -16,7 +16,7 @@ async def test_stdio_server():
     ]
 
     for message in messages:
-        stdin.write(message.model_dump_json(by_alias=True) + "\n")
+        stdin.write(message.model_dump_json(by_alias=True, exclude_none=True) + "\n")
     stdin.seek(0)
 
     async with stdio_server(
