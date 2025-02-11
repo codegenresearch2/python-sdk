@@ -83,7 +83,7 @@ class SseServerTransport:
         logger.debug("Starting SSE response task")
 
         async with anyio.create_task_group() as tg:
-            tg.start_soon(response, scope, receive, send)
+            await tg.start_soon(response, scope, receive, send)
 
             logger.debug("Yielding read and write streams")
             yield (read_stream, write_stream)
