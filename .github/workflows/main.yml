@@ -1,7 +1,7 @@
 on:
   push:
     branches:
-      - main
+      - '**'
 
   pull_request:
 
@@ -17,4 +17,4 @@ jobs:
 
       - run: pip install .
       - run: pip install -U pytest trio
-      - run: pytest
+      - run: pytest -vv
