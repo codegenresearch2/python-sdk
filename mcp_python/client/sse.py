@@ -104,7 +104,7 @@ async def sse_client(url: str, headers: dict[str, Any] | None = None, timeout: f
                                     logger.debug(f"Sending client message: {message}")
                                     response = await client.post(
                                         endpoint_url,
-                                        json=message.model_dump(by_alias=True, mode="json", exclude_none=True),
+                                        json=message.model_dump(exclude_none=True),
                                     )
                                     response.raise_for_status()
                                     logger.debug(
