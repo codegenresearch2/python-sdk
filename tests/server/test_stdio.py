@@ -1,4 +1,5 @@
 import io
+import logging
 
 import anyio
 import pytest
@@ -6,6 +7,9 @@ import pytest
 from mcp_python.server.stdio import stdio_server
 from mcp_python.types import JSONRPCMessage, JSONRPCRequest, JSONRPCResponse
 
+# Configure logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 @pytest.mark.anyio
 async def test_stdio_server():
@@ -18,7 +22,7 @@ async def test_stdio_server():
     ]
 
     for message in messages:
-        stdin.write(message.model_dump_json(by_alias=True, exclude_none=True) + "\n")
+        stdin.write(message.model_dump_json(exclude_none=True) + "\n")
     stdin.seek(0)
 
     async with stdio_server(
@@ -28,6 +32,7 @@ async def test_stdio_server():
         async with read_stream:
             async for message in read_stream:
                 if isinstance(message, Exception):
+                    logger.error(f"Error reading message: {message}")
                     raise message
                 received_messages.append(message)
                 if len(received_messages) == 2:
