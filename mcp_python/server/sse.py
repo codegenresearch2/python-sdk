@@ -74,7 +74,7 @@ class SseServerTransport:
                     await sse_stream_writer.send(
                         {
                             "event": "message",
-                            "data": message.model_dump_json(exclude_none=True),
+                            "data": message.model_dump_json(by_alias=True, exclude_none=True),
                         }
                     )
 
