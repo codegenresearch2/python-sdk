@@ -78,9 +78,11 @@ async def sse_client(url: str, headers: dict[str, Any] | None = None, timeout: f
                                         except ValidationError as err:
                                             logger.error(f"Failed to parse message: {err}")
                                             await read_stream_writer.send(err)
+                                            continue  # Continue to the next event
                                         except Exception as exc:
                                             logger.error(f"Error parsing server message: {exc}")
                                             await read_stream_writer.send(exc)
+                                            continue  # Continue to the next event
                                         else:
                                             await read_stream_writer.send(message)
                         except Exception as exc:
