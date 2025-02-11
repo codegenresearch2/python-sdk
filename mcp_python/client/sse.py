@@ -53,6 +53,7 @@ async def sse_client(url: str, headers: dict[str, Any] | None = None, timeout: f
                     ):
                         try:
                             async for sse in event_source.aiter_sse():
+                                logger.debug(f"Received SSE event: {sse.event}")
                                 match sse.event:
                                     case "endpoint":
                                         endpoint_url = urljoin(url, sse.data)
@@ -77,13 +78,11 @@ async def sse_client(url: str, headers: dict[str, Any] | None = None, timeout: f
                                         except ValidationError as err:
                                             logger.error(f"Failed to parse message: {err}")
                                             await read_stream_writer.send(err)
-                                            continue
                                         except Exception as exc:
                                             logger.error(f"Error parsing server message: {exc}")
                                             await read_stream_writer.send(exc)
-                                            continue
-
-                                        await read_stream_writer.send(message)
+                                        else:
+                                            await read_stream_writer.send(message)
                         except Exception as exc:
                             logger.error(f"Error in sse_reader: {exc}")
                             await read_stream_writer.send(exc)
