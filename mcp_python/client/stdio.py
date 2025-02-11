@@ -54,13 +54,14 @@ async def stdio_client(server: StdioServerParameters):
                     buffer = lines.pop()
 
                     for line in lines:
-                        try:
-                            message = JSONRPCMessage.model_validate_json(line)
-                        except Exception as exc:
-                            await read_stream_writer.send(exc)
-                            continue
+                        if line.strip():  # Exclude empty lines
+                            try:
+                                message = JSONRPCMessage.model_validate_json(line)
+                            except Exception as exc:
+                                await read_stream_writer.send(exc)
+                                continue
 
-                        await read_stream_writer.send(message)
+                            await read_stream_writer.send(message)
         except anyio.ClosedResourceError:
             await anyio.lowlevel.checkpoint()
 
