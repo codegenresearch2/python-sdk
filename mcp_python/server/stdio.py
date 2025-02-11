@@ -21,8 +21,8 @@ async def stdio_server(
     if not stdout:
         stdout = anyio.wrap_file(sys.stdout)
 
-    read_stream: MemoryObjectReceiveStream[JSONRPCMessage | Exception]
-    read_stream_writer: MemoryObjectSendStream[JSONRPCMessage | Exception]
+    read_stream: MemoryObjectReceiveStream[JSONRPCMessage]
+    read_stream_writer: MemoryObjectSendStream[JSONRPCMessage]
 
     write_stream: MemoryObjectSendStream[JSONRPCMessage]
     write_stream_reader: MemoryObjectReceiveStream[JSONRPCMessage]
