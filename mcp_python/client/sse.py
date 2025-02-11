@@ -55,31 +55,30 @@ async def sse_client(url: str, headers: Optional[dict[str, Any]] = None, timeout
                             async for sse in event_source.aiter_sse():
                                 logger.debug(f"Received SSE event: {sse.event}")
                                 try:
-                                    match sse.event:
-                                        case "endpoint":
-                                            endpoint_url = urljoin(url, sse.data)
-                                            logger.info(f"Received endpoint URL: {endpoint_url}")
+                                    if sse.event == "endpoint":
+                                        endpoint_url = urljoin(url, sse.data)
+                                        logger.info(f"Received endpoint URL: {endpoint_url}")
 
-                                            url_parsed = urlparse(url)
-                                            endpoint_parsed = urlparse(endpoint_url)
-                                            if (
-                                                url_parsed.netloc != endpoint_parsed.netloc
-                                                or url_parsed.scheme != endpoint_parsed.scheme
-                                            ):
-                                                error_msg = f"Endpoint origin does not match connection origin: {endpoint_url}"
-                                                logger.error(error_msg)
-                                                raise ValueError(error_msg)
+                                        url_parsed = urlparse(url)
+                                        endpoint_parsed = urlparse(endpoint_url)
+                                        if (
+                                            url_parsed.netloc != endpoint_parsed.netloc
+                                            or url_parsed.scheme != endpoint_parsed.scheme
+                                        ):
+                                            error_msg = f"Endpoint origin does not match connection origin: {endpoint_url}"
+                                            logger.error(error_msg)
+                                            raise ValueError(error_msg)
 
-                                            task_status.started(endpoint_url)
+                                        task_status.started(endpoint_url)
 
-                                        case "message":
-                                            try:
-                                                message = JSONRPCMessage.model_validate_json(sse.data)
-                                                logger.debug(f"Received server message: {message}")
-                                                await read_stream_writer.send(message)
-                                            except ValidationError as err:
-                                                logger.error(f"Error parsing server message: {err}")
-                                                await read_stream_writer.send(err)
+                                    elif sse.event == "message":
+                                        try:
+                                            message = JSONRPCMessage.model_validate_json(sse.data)
+                                            logger.debug(f"Received server message: {message}")
+                                            await read_stream_writer.send(message)
+                                        except ValidationError as err:
+                                            logger.error(f"Error parsing server message: {err}")
+                                            await read_stream_writer.send(err)
                                 except Exception as exc:
                                     logger.error(f"Error in sse_reader: {exc}")
                                     await read_stream_writer.send(exc)
