@@ -98,7 +98,8 @@ class SseServerTransport:
         if session_id_param is None:
             logger.warning("Received request without session_id")
             response = Response("session_id is required", status_code=400)
-            return await response(scope, receive, send)
+            await response(scope, receive, send)
+            return
 
         try:
             session_id = UUID(hex=session_id_param)
@@ -106,13 +107,15 @@ class SseServerTransport:
         except ValueError:
             logger.warning(f"Received invalid session ID: {session_id_param}")
             response = Response("Invalid session ID", status_code=400)
-            return await response(scope, receive, send)
+            await response(scope, receive, send)
+            return
 
         writer = self._read_stream_writers.get(session_id)
         if not writer:
             logger.warning(f"Could not find session for ID: {session_id}")
             response = Response("Could not find session", status_code=404)
-            return await response(scope, receive, send)
+            await response(scope, receive, send)
+            return
 
         json = await request.json()
         logger.debug(f"Received JSON: {json}")
