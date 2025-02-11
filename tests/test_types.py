@@ -10,7 +10,7 @@ def test_jsonrpc_request():
             "protocolVersion": 1,
             "capabilities": {"batch": None, "sampling": None},
             "clientInfo": {"name": "mcp_python", "version": "0.1.0"},
-        }
+        },
     }
 
     request = JSONRPCMessage.model_validate(json_data)
