@@ -53,21 +53,37 @@ async def sse_client(url: str, headers: dict[str, Any] | None = None, timeout: f
                     ):
                         try:
                             async for sse in event_source.aiter_sse():
-                                logger.debug(f"Received SSE event: {sse.event}")
-                                if sse.event == "message":
-                                    try:
-                                        message = JSONRPCMessage.model_validate_json(sse.data)
-                                        logger.debug(f"Received server message: {message}")
-                                    except ValidationError as err:
-                                        logger.error(f"Failed to parse message: {err}")
-                                        await read_stream_writer.send(err)
-                                        continue
-                                    except Exception as exc:
-                                        logger.error(f"Error parsing server message: {exc}")
-                                        await read_stream_writer.send(exc)
-                                        continue
+                                match sse.event:
+                                    case "endpoint":
+                                        endpoint_url = urljoin(url, sse.data)
+                                        logger.info(f"Received endpoint URL: {endpoint_url}")
 
-                                    await read_stream_writer.send(message)
+                                        url_parsed = urlparse(url)
+                                        endpoint_parsed = urlparse(endpoint_url)
+                                        if (
+                                            url_parsed.netloc != endpoint_parsed.netloc
+                                            or url_parsed.scheme != endpoint_parsed.scheme
+                                        ):
+                                            error_msg = f"Endpoint origin does not match connection origin: {endpoint_url}"
+                                            logger.error(error_msg)
+                                            raise ValueError(error_msg)
+
+                                        task_status.started(endpoint_url)
+
+                                    case "message":
+                                        try:
+                                            message = JSONRPCMessage.model_validate_json(sse.data)
+                                            logger.debug(f"Received server message: {message}")
+                                        except ValidationError as err:
+                                            logger.error(f"Failed to parse message: {err}")
+                                            await read_stream_writer.send(err)
+                                            continue
+                                        except Exception as exc:
+                                            logger.error(f"Error parsing server message: {exc}")
+                                            await read_stream_writer.send(exc)
+                                            continue
+
+                                        await read_stream_writer.send(message)
                         except Exception as exc:
                             logger.error(f"Error in sse_reader: {exc}")
                             await read_stream_writer.send(exc)
@@ -81,21 +97,17 @@ async def sse_client(url: str, headers: dict[str, Any] | None = None, timeout: f
                                     logger.debug(f"Sending client message: {message}")
                                     response = await client.post(
                                         endpoint_url,
-                                        json=message.model_dump(exclude_none=True),
+                                        json=message.model_dump(by_alias=True, mode="json", exclude_none=True),
                                     )
                                     response.raise_for_status()
-                                    logger.debug(
-                                        f"Client message sent successfully: {response.status_code}"
-                                    )
+                                    logger.debug(f"Client message sent successfully: {response.status_code}")
                         except Exception as exc:
                             logger.error(f"Error in post_writer: {exc}")
                         finally:
                             await write_stream.aclose()
 
                     endpoint_url = await tg.start(sse_reader)
-                    logger.info(
-                        f"Starting post writer with endpoint URL: {endpoint_url}"
-                    )
+                    logger.info(f"Starting post writer with endpoint URL: {endpoint_url}")
                     tg.start_soon(post_writer, endpoint_url)
 
                     try:
