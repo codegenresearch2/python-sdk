@@ -31,7 +31,7 @@ class SseServerTransport:
         """
         Creates a new SSE server transport, which will direct the client to POST messages to the relative or absolute URL given.
         """
-
+        super().__init__()
         self._endpoint = endpoint
         self._read_stream_writers = {}
         logger.debug(f"SseServerTransport initialized with endpoint: {endpoint}")
