@@ -22,7 +22,7 @@ async def test_stdio_server():
     ]
 
     for message in messages:
-        stdin.write(message.model_dump_json(exclude_none=True) + "\n")
+        stdin.write(message.model_dump_json(by_alias=True) + "\n")
     stdin.seek(0)
 
     async with stdio_server(
@@ -32,7 +32,6 @@ async def test_stdio_server():
         async with read_stream:
             async for message in read_stream:
                 if isinstance(message, Exception):
-                    logger.error(f"Error reading message: {message}")
                     raise message
                 received_messages.append(message)
                 if len(received_messages) == 2:
