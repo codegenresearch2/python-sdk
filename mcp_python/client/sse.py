@@ -75,7 +75,7 @@ async def sse_client(url: str, headers: Optional[dict[str, Any]] = None, timeout
                                         try:
                                             message = JSONRPCMessage.model_validate_json(sse.data)
                                             logger.debug(f"Received server message: {message}")
-                                        except ValidationError as err:
+                                        except Exception as err:
                                             logger.error(f"Error parsing server message: {err}")
                                             await read_stream_writer.send(err)
                                             continue
