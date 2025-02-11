@@ -35,7 +35,7 @@ async def test_client_session_initialize():
         jsonrpc_request = await client_to_server_receive.receive()
         assert isinstance(jsonrpc_request.root, JSONRPCRequest)
         request = ClientRequest.model_validate(
-            jsonrpc_request.model_dump(by_alias=True, exclude_none=True)
+            jsonrpc_request.model_dump(by_alias=True, exclude_none=True, mode="json")
         )
         assert isinstance(request.root, InitializeRequest)
 
@@ -59,14 +59,14 @@ async def test_client_session_initialize():
                     JSONRPCResponse(
                         jsonrpc="2.0",
                         id=jsonrpc_request.root.id,
-                        result=result.model_dump(by_alias=True, exclude_none=True),
+                        result=result.model_dump(by_alias=True, exclude_none=True, mode="json"),
                     )
                 )
             )
             jsonrpc_notification = await client_to_server_receive.receive()
             assert isinstance(jsonrpc_notification.root, JSONRPCNotification)
             initialized_notification = ClientNotification.model_validate(
-                jsonrpc_notification.model_dump(by_alias=True, exclude_none=True)
+                jsonrpc_notification.model_dump(by_alias=True, exclude_none=True, mode="json")
             )
 
     async def listen_session():
