@@ -20,8 +20,8 @@ from mcp_python.types import (
 
 @pytest.mark.anyio
 async def test_client_session_initialize():
-    client_to_server_send, client_to_server_receive = anyio.create_memory_object_stream[JSONRPCMessage](1)
-    server_to_client_send, server_to_client_receive = anyio.create_memory_object_stream[JSONRPCMessage](1)
+    client_to_server_send, client_to_server_receive = anyio.create_memory_object_stream(1, JSONRPCMessage)
+    server_to_client_send, server_to_client_receive = anyio.create_memory_object_stream(1, JSONRPCMessage)
 
     initialized_notification = None
 
@@ -33,8 +33,8 @@ async def test_client_session_initialize():
         request = ClientRequest.model_validate(
             jsonrpc_request.model_dump(
                 by_alias=True,
-                mode="json",
-                exclude_none=True
+                exclude_none=True,
+                mode="json"
             )
         )
         assert isinstance(request.root, InitializeRequest)
@@ -61,8 +61,8 @@ async def test_client_session_initialize():
                         id=jsonrpc_request.root.id,
                         result=result.model_dump(
                             by_alias=True,
-                            mode="json",
-                            exclude_none=True
+                            exclude_none=True,
+                            mode="json"
                         ),
                     )
                 )
@@ -72,8 +72,8 @@ async def test_client_session_initialize():
             initialized_notification = ClientNotification.model_validate(
                 jsonrpc_notification.model_dump(
                     by_alias=True,
-                    mode="json",
-                    exclude_none=True
+                    exclude_none=True,
+                    mode="json"
                 )
             )
 
