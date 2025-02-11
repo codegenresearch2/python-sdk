@@ -7,7 +7,6 @@ from uuid import UUID, uuid4
 import anyio
 from anyio.streams.memory import MemoryObjectReceiveStream, MemoryObjectSendStream
 from pydantic import ValidationError
-from sse_starlette import EventSourceResponse
 from starlette.requests import Request
 from starlette.responses import Response
 from starlette.types import Receive, Scope, Send
@@ -33,7 +32,6 @@ class SseServerTransport:
         Creates a new SSE server transport, which will direct the client to POST messages to the relative or absolute URL given.
         """
 
-        super().__init__()
         self._endpoint = endpoint
         self._read_stream_writers = {}
         logger.debug(f"SseServerTransport initialized with endpoint: {endpoint}")
@@ -78,11 +76,12 @@ class SseServerTransport:
                         }
                     )
 
+        response = EventSourceResponse(
+            content=sse_stream_reader, data_sender_callable=sse_writer
+        )
+        logger.debug("Starting SSE response task")
+
         async with anyio.create_task_group() as tg:
-            response = EventSourceResponse(
-                content=sse_stream_reader, data_sender_callable=sse_writer
-            )
-            logger.debug("Starting SSE response task")
             tg.start_soon(response, scope, receive, send)
 
             logger.debug("Yielding read and write streams")
