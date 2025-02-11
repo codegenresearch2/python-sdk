@@ -104,8 +104,8 @@ class SseServerTransport:
             session_id = UUID(hex=session_id_param)
             logger.debug(f"Parsed session ID: {session_id}")
         except ValueError:
-            logger.warning(f"Received invalid session ID: {session_id_param}")
-            response = Response("Invalid session ID", status_code=400)
+            logger.warning(f"Received invalid session_id: {session_id_param}")
+            response = Response("Invalid session_id", status_code=400)
             return await response(scope, receive, send)
 
         writer = self._read_stream_writers.get(session_id)
